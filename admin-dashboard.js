@@ -150,351 +150,307 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
     }
-  })
   
-  // Update dashboard stats
-  function updateDashboardStats(orders) {
-    const totalOrdersElement = document.getElementById("total-orders")
-    const totalRevenueElement = document.getElementById("total-revenue")
-    const totalCustomersElement = document.getElementById("total-customers")
-    const totalProductsElement = document.getElementById("total-products")
+    // Product Management
+    const productsTable = document.getElementById("products-table")
+    const addProductBtn = document.getElementById("add-product-btn")
+    const productFormModal = document.getElementById("product-form-modal")
+    const productForm = document.getElementById("product-form")
+    const saveProductBtn = document.getElementById("save-product-btn")
+    const productFormTitle = document.getElementById("product-form-title")
   
-    if (totalOrdersElement) {
-      totalOrdersElement.textContent = orders.length
+    // Load products from localStorage
+    let products = JSON.parse(localStorage.getItem("products")) || []
+  
+    // Initialize with some sample products if none exist
+    if (products.length === 0) {
+      products = [
+        {
+          id: "prod-" + Math.random().toString(36).substr(2, 9),
+          name: "Classic Oxford Shirt",
+          category: "shirts",
+          price: 199,
+          oldPrice: 249,
+          image:
+            "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=465&q=80",
+          description: "A classic Oxford shirt perfect for any occasion.",
+          status: "active",
+          badge: "new",
+        },
+        {
+          id: "prod-" + Math.random().toString(36).substr(2, 9),
+          name: "Premium Hoodie",
+          category: "hoodies",
+          price: 299,
+          oldPrice: 349,
+          image:
+            "https://images.unsplash.com/photo-1606913419164-a8fc807ae4a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+          description: "A premium quality hoodie for ultimate comfort.",
+          status: "active",
+          badge: "sale",
+        },
+      ]
+      localStorage.setItem("products", JSON.stringify(products))
     }
   
-    if (totalRevenueElement) {
-      const totalRevenue = orders.reduce((total, order) => total + order.total, 0)
-      totalRevenueElement.textContent = `${totalRevenue.toFixed(2)} dhs`
-    }
+    // Load products
+    loadProducts(products)
   
-    if (totalCustomersElement) {
-      // Get unique customers by email
-      const uniqueCustomers = new Set(orders.map((order) => order.customer.email))
-      totalCustomersElement.textContent = uniqueCustomers.size
-    }
+    // Add product button
+    if (addProductBtn) {
+      addProductBtn.addEventListener("click", () => {
+        // Reset form
+        productForm.reset()
+        document.getElementById("product-id").value = ""
+        productFormTitle.textContent = "Add New Product"
   
-    if (totalProductsElement) {
-      // Get unique products
-      const uniqueProducts = new Set()
-      orders.forEach((order) => {
-        order.products.forEach((product) => {
-          uniqueProducts.add(product.name)
-        })
+        // Show modal
+        productFormModal.classList.add("active")
       })
-      totalProductsElement.textContent = uniqueProducts.size
     }
-  }
   
-  // Load recent orders
-  function loadRecentOrders(orders) {
-    const recentOrdersTable = document.getElementById("recent-orders-table")
+    // Close product form modal
+    const closeProductModalBtns = productFormModal.querySelectorAll(".close-modal, .close-modal-btn")
+    closeProductModalBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        productFormModal.classList.remove("active")
+      })
+    })
   
-    if (recentOrdersTable) {
-      // Sort orders by date (newest first)
-      const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date))
-  
-      // Get the 5 most recent orders
-      const recentOrders = sortedOrders.slice(0, 5)
-  
-      if (recentOrders.length === 0) {
-        recentOrdersTable.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center">No orders found</td>
-          </tr>
-        `
-        return
-      }
-  
-      recentOrdersTable.innerHTML = recentOrders
-        .map(
-          (order) => `
-        <tr>
-          <td>${order.id}</td>
-          <td>${order.customer.name || "N/A"}</td>
-          <td>${new Date(order.date).toLocaleDateString()}</td>
-          <td>${order.total.toFixed(2)} dhs</td>
-          <td><span class="status status-${order.status || "processing"}">${order.status || "Processing"}</span></td>
-        </tr>
-      `,
-        )
-        .join("")
-    }
-  }
-  
-  // Load all orders
-  function loadAllOrders(orders) {
-    const ordersTable = document.getElementById("orders-table")
-  
-    if (ordersTable) {
-      // Apply filters
-      let filteredOrders = [...orders]
-  
-      // Status filter
-      const statusFilter = document.getElementById("status-filter")
-      if (statusFilter && statusFilter.value !== "all") {
-        filteredOrders = filteredOrders.filter((order) => (order.status || "processing") === statusFilter.value)
-      }
-  
-      // Date filter
-      const dateFilter = document.getElementById("date-filter")
-      if (dateFilter) {
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-  
-        const weekStart = new Date(today)
-        weekStart.setDate(today.getDate() - today.getDay())
-  
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-  
-        if (dateFilter.value === "today") {
-          filteredOrders = filteredOrders.filter((order) => new Date(order.date) >= today)
-        } else if (dateFilter.value === "week") {
-          filteredOrders = filteredOrders.filter((order) => new Date(order.date) >= weekStart)
-        } else if (dateFilter.value === "month") {
-          filteredOrders = filteredOrders.filter((order) => new Date(order.date) >= monthStart)
+    // Save product
+    if (saveProductBtn) {
+      saveProductBtn.addEventListener("click", () => {
+        // Get form data
+        const formData = new FormData(productForm)
+        const productData = {
+          name: formData.get("name"),
+          category: formData.get("category"),
+          price: Number.parseFloat(formData.get("price")),
+          oldPrice: formData.get("oldPrice") ? Number.parseFloat(formData.get("oldPrice")) : null,
+          image: formData.get("image"),
+          description: formData.get("description"),
+          status: formData.get("status"),
+          badge: formData.get("badge"),
         }
+  
+        // Validate form
+        if (!productData.name || !productData.category || !productData.price || !productData.image) {
+          showNotification("Please fill in all required fields", "error")
+          return
+        }
+  
+        const productId = document.getElementById("product-id").value
+  
+        if (productId) {
+          // Update existing product
+          productData.id = productId
+          const updatedProducts = products.map((product) => {
+            if (product.id === productId) {
+              return productData
+            }
+            return product
+          })
+          products = updatedProducts
+          showNotification("Product updated successfully")
+        } else {
+          // Add new product
+          productData.id = "prod-" + Math.random().toString(36).substr(2, 9)
+          products.push(productData)
+          showNotification("Product added successfully")
+        }
+  
+        // Save to localStorage
+        localStorage.setItem("products", JSON.stringify(products))
+  
+        // Reload products
+        loadProducts(products)
+  
+        // Close modal
+        productFormModal.classList.remove("active")
+      })
+    }
+  
+    // Category filter
+    const categoryFilter = document.getElementById("category-filter")
+    if (categoryFilter) {
+      categoryFilter.addEventListener("change", () => {
+        filterProducts()
+      })
+    }
+  
+    // Product search
+    const productSearchBtn = document.getElementById("product-search-btn")
+    const productSearch = document.getElementById("product-search")
+    if (productSearchBtn && productSearch) {
+      productSearchBtn.addEventListener("click", () => {
+        filterProducts()
+      })
+  
+      productSearch.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          filterProducts()
+        }
+      })
+    }
+  
+    // Filter products
+    function filterProducts() {
+      let filteredProducts = [...products]
+  
+      // Category filter
+      const categoryFilter = document.getElementById("category-filter")
+      if (categoryFilter && categoryFilter.value !== "all") {
+        filteredProducts = filteredProducts.filter((product) => product.category === categoryFilter.value)
       }
   
       // Search
-      const orderSearch = document.getElementById("order-search")
-      if (orderSearch && orderSearch.value.trim() !== "") {
-        const searchTerm = orderSearch.value.trim().toLowerCase()
-        filteredOrders = filteredOrders.filter(
-          (order) =>
-            order.id.toLowerCase().includes(searchTerm) ||
-            (order.customer.name && order.customer.name.toLowerCase().includes(searchTerm)) ||
-            (order.customer.email && order.customer.email.toLowerCase().includes(searchTerm)),
+      const productSearch = document.getElementById("product-search")
+      if (productSearch && productSearch.value.trim() !== "") {
+        const searchTerm = productSearch.value.trim().toLowerCase()
+        filteredProducts = filteredProducts.filter(
+          (product) =>
+            product.name.toLowerCase().includes(searchTerm) ||
+            (product.description && product.description.toLowerCase().includes(searchTerm)),
         )
       }
   
-      // Sort orders by date (newest first)
-      filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date))
-  
-      if (filteredOrders.length === 0) {
-        ordersTable.innerHTML = `
-          <tr>
-            <td colspan="7" class="text-center">No orders found</td>
-          </tr>
-        `
-        return
-      }
-  
-      ordersTable.innerHTML = filteredOrders
-        .map(
-          (order) => `
-        <tr>
-          <td>${order.id}</td>
-          <td>${order.customer.name || "N/A"}</td>
-          <td>${new Date(order.date).toLocaleDateString()}</td>
-          <td>${order.products.length} item${order.products.length !== 1 ? "s" : ""}</td>
-          <td>${order.total.toFixed(2)} dhs</td>
-          <td><span class="status status-${order.status || "processing"}">${order.status || "Processing"}</span></td>
-          <td>
-            <button class="action-btn view-btn" onclick="viewOrderDetails('${order.id}')">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="action-btn edit-btn" onclick="editOrder('${order.id}')">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="action-btn delete-btn" onclick="deleteOrder('${order.id}')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `,
-        )
-        .join("")
+      // Load filtered products
+      loadProducts(filteredProducts)
     }
-  }
   
-  // View order details
-  function viewOrderDetails(orderId) {
-    const orders = JSON.parse(localStorage.getItem("orders")) || []
-    const order = orders.find((order) => order.id === orderId)
-  
-    if (order) {
-      const orderDetailsContent = document.getElementById("order-details-content")
-      const orderDetailsModal = document.getElementById("order-details-modal")
-      const updateStatusBtn = document.querySelector(".update-status-btn")
-  
-      if (orderDetailsContent && orderDetailsModal) {
-        // Set order ID for update button
-        if (updateStatusBtn) {
-          updateStatusBtn.setAttribute("data-order-id", orderId)
+    // Load products
+    function loadProducts(productsToLoad) {
+      if (productsTable) {
+        if (productsToLoad.length === 0) {
+          productsTable.innerHTML = `
+            <tr>
+              <td colspan="7" class="text-center">No products found</td>
+            </tr>
+          `
+          return
         }
   
-        orderDetailsContent.innerHTML = `
-          <div class="order-details-section">
-            <h4>Order Information</h4>
-            <div class="order-details-grid">
-              <div>
-                <div class="order-details-item">
-                  <span>Order ID:</span> ${order.id}
-                </div>
-                <div class="order-details-item">
-                  <span>Date:</span> ${new Date(order.date).toLocaleString()}
-                </div>
-                <div class="order-details-item">
-                  <span>Status:</span> <span class="status status-${order.status || "processing"}">${order.status || "Processing"}</span>
-                </div>
+        productsTable.innerHTML = productsToLoad
+          .map(
+            (product) => `
+          <tr>
+            <td>
+              <div class="product-image-cell">
+                <img src="${product.image}" alt="${product.name}">
               </div>
-              <div>
-                <div class="order-details-item">
-                  <span>Payment Method:</span> ${order.payment}
-                </div>
-                <div class="order-details-item">
-                  <span>Delivery Method:</span> ${order.delivery.method}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="order-details-section">
-            <h4>Customer Information</h4>
-            <div class="order-details-grid">
-              <div>
-                <div class="order-details-item">
-                  <span>Name:</span> ${order.customer.name || "N/A"}
-                </div>
-                <div class="order-details-item">
-                  <span>Email:</span> ${order.customer.email || "N/A"}
-                </div>
-                <div class="order-details-item">
-                  <span>Phone:</span> ${order.customer.phone || "N/A"}
-                </div>
-              </div>
-              <div>
-                <div class="order-details-item">
-                  <span>City:</span> ${order.customer.city || "N/A"}
-                </div>
-                <div class="order-details-item">
-                  <span>Address:</span> ${order.customer.address || "N/A"}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="order-details-section">
-            <h4>Products</h4>
-            <div class="order-products-list">
-              ${order.products
-                .map(
-                  (product) => `
-                <div class="order-product-item">
-                  <div class="order-product-img">
-                    <img src="${product.image}" alt="${product.name}">
-                  </div>
-                  <div class="order-product-details">
-                    <h5>${product.name}</h5>
-                    <p>Color: ${product.color}, Size: ${product.size}</p>
-                    <p>Quantity: ${product.quantity}</p>
-                  </div>
-                  <div class="order-product-price">${product.price} dhs</div>
-                </div>
-              `,
-                )
-                .join("")}
-            </div>
-            
-            <div class="order-summary">
-              <div class="summary-row">
-                <span>Subtotal:</span>
-                <span>${order.subtotal.toFixed(2)} dhs</span>
-              </div>
-              <div class="summary-row">
-                <span>Shipping:</span>
-                <span>${order.delivery.fee} dhs</span>
-              </div>
-              <div class="summary-row total">
-                <span>Total:</span>
-                <span>${order.total.toFixed(2)} dhs</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="status-select">
-            <label for="status-select">Update Order Status</label>
-            <select id="status-select">
-              <option value="processing" ${(order.status || "processing") === "processing" ? "selected" : ""}>Processing</option>
-              <option value="shipped" ${(order.status || "processing") === "shipped" ? "selected" : ""}>Shipped</option>
-              <option value="delivered" ${(order.status || "processing") === "delivered" ? "selected" : ""}>Delivered</option>
-              <option value="cancelled" ${(order.status || "processing") === "cancelled" ? "selected" : ""}>Cancelled</option>
-            </select>
-          </div>
-        `
-  
-        orderDetailsModal.classList.add("active")
+            </td>
+            <td>${product.name}</td>
+            <td>${capitalizeFirstLetter(product.category)}</td>
+            <td>${product.price} dhs</td>
+            <td>${product.oldPrice ? product.oldPrice + " dhs" : "-"}</td>
+            <td><span class="status status-${product.status}">${capitalizeFirstLetter(product.status)}</span></td>
+            <td>
+              <button class="action-btn view-btn" onclick="viewProduct('${product.id}')">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn edit-btn" onclick="editProduct('${product.id}')">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteProduct('${product.id}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `,
+          )
+          .join("")
       }
     }
-  }
   
-  // Edit order
-  function editOrder(orderId) {
-    // In a real application, this would open a form to edit the order
-    alert(`Edit order ${orderId} functionality coming soon!`)
-  }
+    // Helper function to capitalize first letter
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    }
   
-  // Delete order
-  function deleteOrder(orderId) {
-    if (confirm("Are you sure you want to delete this order?")) {
-      const orders = JSON.parse(localStorage.getItem("orders")) || []
-      const updatedOrders = orders.filter((order) => order.id !== orderId)
+    function updateDashboardStats(orders) {
+      // Dummy implementation
+      console.log("updateDashboardStats called with orders:", orders)
+    }
   
-      // Save updated orders to localStorage
-      localStorage.setItem("orders", JSON.stringify(updatedOrders))
+    function loadRecentOrders(orders) {
+      // Dummy implementation
+      console.log("loadRecentOrders called with orders:", orders)
+    }
   
-      // Reload orders
-      loadAllOrders(updatedOrders)
-      loadRecentOrders(updatedOrders)
+    function loadAllOrders(orders) {
+      // Dummy implementation
+      console.log("loadAllOrders called with orders:", orders)
+    }
   
-      // Update dashboard stats
-      updateDashboardStats(updatedOrders)
+    function showNotification(message, type = "success") {
+      // Dummy implementation
+      console.log("showNotification called with message:", message, "and type:", type)
+    }
+  })
   
-      // Show success message
-      showNotification("Order deleted successfully")
+  // View product
+  function viewProduct(productId) {
+    const products = JSON.parse(localStorage.getItem("products")) || []
+    const product = products.find((product) => product.id === productId)
+  
+    if (product) {
+      alert(`
+        Product: ${product.name}
+        Category: ${capitalizeFirstLetter(product.category)}
+        Price: ${product.price} dhs
+        ${product.oldPrice ? "Old Price: " + product.oldPrice + " dhs" : ""}
+        Status: ${capitalizeFirstLetter(product.status)}
+        Badge: ${product.badge ? capitalizeFirstLetter(product.badge) : "None"}
+        Description: ${product.description || "No description"}
+      `)
     }
   }
   
-  // Show notification
-  function showNotification(message, type = "success") {
-    // Create notification element
-    const notification = document.createElement("div")
-    notification.className = `notification ${type}`
-    notification.textContent = message
+  // Edit product
+  function editProduct(productId) {
+    const products = JSON.parse(localStorage.getItem("products")) || []
+    const product = products.find((product) => product.id === productId)
   
-    // Add notification styles
-    notification.style.position = "fixed"
-    notification.style.bottom = "20px"
-    notification.style.right = "20px"
-    notification.style.backgroundColor = type === "success" ? "#2ecc71" : "#e74c3c"
-    notification.style.color = "white"
-    notification.style.padding = "10px 20px"
-    notification.style.borderRadius = "5px"
-    notification.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)"
-    notification.style.zIndex = "1000"
-    notification.style.opacity = "0"
-    notification.style.transform = "translateY(20px)"
-    notification.style.transition = "opacity 0.3s, transform 0.3s"
+    if (product) {
+      // Fill form with product data
+      document.getElementById("product-id").value = product.id
+      document.getElementById("product-name").value = product.name
+      document.getElementById("product-category").value = product.category
+      document.getElementById("product-price").value = product.price
+      document.getElementById("product-old-price").value = product.oldPrice || ""
+      document.getElementById("product-image").value = product.image
+      document.getElementById("product-description").value = product.description || ""
+      document.getElementById("product-status").value = product.status
+      document.getElementById("product-badge").value = product.badge || ""
   
-    // Add to DOM
-    document.body.appendChild(notification)
+      // Update form title
+      document.getElementById("product-form-title").textContent = "Edit Product"
   
-    // Trigger animation
-    setTimeout(() => {
-      notification.style.opacity = "1"
-      notification.style.transform = "translateY(0)"
-    }, 10)
+      // Show modal
+      document.getElementById("product-form-modal").classList.add("active")
+    }
+  }
   
-    // Remove after 3 seconds
-    setTimeout(() => {
-      notification.style.opacity = "0"
-      notification.style.transform = "translateY(20px)"
+  // Delete product
+  function deleteProduct(productId) {
+    if (confirm("Are you sure you want to delete this product?")) {
+      const products = JSON.parse(localStorage.getItem("products")) || []
+      const updatedProducts = products.filter((product) => product.id !== productId)
   
-      // Remove from DOM after animation
-      setTimeout(() => {
-        document.body.removeChild(notification)
-      }, 300)
-    }, 3000)
+      // Save updated products to localStorage
+      localStorage.setItem("products", JSON.stringify(updatedProducts))
+  
+      // Reload products
+      loadProducts(updatedProducts)
+  
+      // Show success message
+      showNotification("Product deleted successfully")
+    }
+  }
+  
+  // Helper function to capitalize first letter
+  function capitalizeFirstLetter(string) {
+    if (!string) return ""
+    return string.charAt(0).toUpperCase() + string.slice(1)
   }
   

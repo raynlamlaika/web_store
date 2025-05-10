@@ -760,3 +760,72 @@
     }
   }
   
+  /* Product Management Styles */
+  .admin-actions {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-family: inherit;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+  }
+  
+  .product-image-cell {
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .product-image-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .status-active {
+    background-color: #c8e6c9;
+    color: #388e3c;
+  }
+  
+  .status-inactive {
+    background-color: #ffcdd2;
+    color: #d32f2f;
+  }
+  
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+  
