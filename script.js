@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Checkout data
       let checkoutProducts = []
       let totalPrice = 0
+      let selectedDeliveryFee = 35 // Default delivery fee
   
       // Open checkout modal
       buyNowButtons.forEach((button) => {
@@ -159,11 +160,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
         // Update checkout total
         const subtotal = checkoutProducts.reduce((total, item) => total + item.price * item.quantity, 0)
-        const delivery = 35 // Default delivery fee
-        totalPrice = subtotal + delivery
+        totalPrice = subtotal + selectedDeliveryFee
   
         if (deliveryFee) {
-          deliveryFee.textContent = `${delivery} dhs`
+          deliveryFee.textContent = `${selectedDeliveryFee} dhs`
         }
   
         if (checkoutTotal) {
@@ -196,25 +196,25 @@ document.addEventListener("DOMContentLoaded", () => {
       if (deliveryOptions.length > 0) {
         deliveryOptions.forEach((radio) => {
           radio.addEventListener("change", function () {
-            let fee = 35
-  
             if (this.id === "option2") {
-              fee = 20
+              selectedDeliveryFee = 20
             } else if (this.id === "option3") {
-              fee = 39
+              selectedDeliveryFee = 39
             } else if (this.id === "option4") {
-              fee = 30
+              selectedDeliveryFee = 30
             } else if (this.id === "option5") {
-              fee = 35
+              selectedDeliveryFee = 35
+            } else {
+              selectedDeliveryFee = 35
             }
   
             if (deliveryFee) {
-              deliveryFee.textContent = `${fee} dhs`
+              deliveryFee.textContent = `${selectedDeliveryFee} dhs`
             }
   
             // Recalculate total
             const subtotal = checkoutProducts.reduce((total, item) => total + item.price * item.quantity, 0)
-            totalPrice = subtotal + fee
+            totalPrice = subtotal + selectedDeliveryFee
   
             if (checkoutTotal) {
               checkoutTotal.textContent = `${totalPrice.toFixed(2)} dhs`
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
       }
   
-      // Form validation for checkout
+      // Form validation and data collection for checkout
       const checkoutBtn = document.querySelector(".checkout-btn")
       const checkoutForm = document.querySelector(".checkout-form")
   
@@ -231,6 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
         checkoutBtn.addEventListener("click", () => {
           const requiredFields = checkoutForm.querySelectorAll("[required]")
           let isValid = true
+          const formData = {}
   
           requiredFields.forEach((field) => {
             if (!field.value) {
@@ -238,11 +239,45 @@ document.addEventListener("DOMContentLoaded", () => {
               field.style.borderColor = "red"
             } else {
               field.style.borderColor = ""
+              // Collect form data
+              formData[field.name] = field.value
             }
           })
   
           if (isValid) {
-            showNotification("Votre commande a été validée avec succès!")
+            // Get selected delivery option
+            const selectedDeliveryOption = document.querySelector('input[name="delivery"]:checked')
+            const deliveryMethod = selectedDeliveryOption
+              ? selectedDeliveryOption.nextElementSibling.textContent
+              : "Standard Delivery"
+  
+            // Get selected payment option
+            const selectedPaymentOption = document.querySelector('input[name="payment"]:checked')
+            const paymentMethod = selectedPaymentOption
+              ? selectedPaymentOption.nextElementSibling.textContent
+              : "Payment on Delivery"
+  
+            // Create order object
+            const order = {
+              id: generateOrderId(),
+              date: new Date().toISOString(),
+              customer: formData,
+              products: checkoutProducts,
+              delivery: {
+                method: deliveryMethod,
+                fee: selectedDeliveryFee,
+              },
+              payment: paymentMethod,
+              subtotal: checkoutProducts.reduce((total, item) => total + item.price * item.quantity, 0),
+              total: totalPrice,
+            }
+  
+            // Save order to localStorage
+            saveOrder(order)
+  
+            // Redirect to confirmation page or show confirmation
+            showOrderConfirmation(order)
+  
             checkoutModal.classList.remove("active")
             document.body.style.overflow = "" // Enable scrolling
             checkoutForm.reset()
@@ -250,6 +285,101 @@ document.addEventListener("DOMContentLoaded", () => {
             showNotification("Veuillez remplir tous les champs obligatoires.", "error")
           }
         })
+      }
+  
+      // Generate a unique order ID
+      function generateOrderId() {
+        return "ORD-" + Math.random().toString(36).substr(2, 9).toUpperCase()
+      }
+  
+      // Save order to localStorage
+      function saveOrder(order) {
+        const orders = JSON.parse(localStorage.getItem("orders")) || []
+        orders.push(order)
+        localStorage.setItem("orders", JSON.stringify(orders))
+      }
+  
+      // Show order confirmation
+      function showOrderConfirmation(order) {
+        // Create confirmation modal
+        const confirmationModal = document.createElement("div")
+        confirmationModal.className = "confirmation-modal"
+  
+        const confirmationContent = document.createElement("div")
+        confirmationContent.className = "confirmation-content"
+  
+        // Create close button
+        const closeBtn = document.createElement("button")
+        closeBtn.className = "close-modal"
+        closeBtn.innerHTML = "×"
+        closeBtn.addEventListener("click", () => {
+          document.body.removeChild(confirmationModal)
+          document.body.style.overflow = ""
+        })
+  
+        // Create confirmation content
+        confirmationContent.innerHTML = `
+          <h2>Order Confirmation</h2>
+          <p>Thank you for your order, ${order.customer.name || "Valued Customer"}!</p>
+          <div class="order-details">
+            <p><strong>Order ID:</strong> ${order.id}</p>
+            <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
+            <h3>Order Summary</h3>
+            <div class="order-items">
+              ${order.products
+                .map(
+                  (product) => `
+                <div class="order-item">
+                  <span>${product.name} (${product.color}, ${product.size})</span>
+                  <span>${product.price} dhs</span>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+            <div class="order-total">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${order.subtotal.toFixed(2)} dhs</span>
+              </div>
+              <div class="total-row">
+                <span>Delivery:</span>
+                <span>${order.delivery.fee} dhs</span>
+              </div>
+              <div class="total-row grand-total">
+                <span>Total:</span>
+                <span>${order.total.toFixed(2)} dhs</span>
+              </div>
+            </div>
+            <h3>Delivery Information</h3>
+            <p><strong>Name:</strong> ${order.customer.name || ""}</p>
+            <p><strong>Email:</strong> ${order.customer.email || ""}</p>
+            <p><strong>Phone:</strong> ${order.customer.phone || ""}</p>
+            <p><strong>City:</strong> ${order.customer.city || ""}</p>
+            <p><strong>Address:</strong> ${order.customer.address || ""}</p>
+            <p><strong>Delivery Method:</strong> ${order.delivery.method}</p>
+            <p><strong>Payment Method:</strong> ${order.payment}</p>
+          </div>
+          <p class="confirmation-message">Your order has been received and is being processed. You will receive a confirmation email shortly.</p>
+          <button class="btn-primary view-orders-btn">View My Orders</button>
+        `
+  
+        confirmationContent.appendChild(closeBtn)
+        confirmationModal.appendChild(confirmationContent)
+        document.body.appendChild(confirmationModal)
+  
+        // Add event listener to view orders button
+        const viewOrdersBtn = confirmationContent.querySelector(".view-orders-btn")
+        if (viewOrdersBtn) {
+          viewOrdersBtn.addEventListener("click", () => {
+            window.location.href = "orders.html"
+          })
+        }
+  
+        // Show the confirmation modal
+        setTimeout(() => {
+          confirmationModal.style.opacity = "1"
+        }, 10)
       }
     }
   
@@ -321,82 +451,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
     }
-  
-    // Add CSS for cart items
-    const style = document.createElement("style")
-    style.textContent = `
-          .cart-item {
-              display: flex;
-              align-items: center;
-              padding: 1rem 0;
-              border-bottom: 1px solid var(--border-color);
-          }
-          
-          .cart-item-img {
-              width: 80px;
-              height: 80px;
-              border-radius: 10px;
-              overflow: hidden;
-              margin-right: 1rem;
-          }
-          
-          .cart-item-img img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-          }
-          
-          .cart-item-details {
-              flex: 1;
-          }
-          
-          .cart-item-details h4 {
-              margin-bottom: 0.5rem;
-          }
-          
-          .cart-item-price {
-              color: var(--primary-color);
-              font-weight: 600;
-              margin-bottom: 0.5rem;
-          }
-          
-          .cart-item-quantity {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-          }
-          
-          .quantity-btn {
-              width: 25px;
-              height: 25px;
-              border-radius: 50%;
-              background-color: var(--light-background);
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              font-weight: bold;
-              transition: var(--transition);
-          }
-          
-          .quantity-btn:hover {
-              background-color: var(--primary-color);
-              color: white;
-          }
-          
-          .remove-item {
-              background: none;
-              color: var(--light-text);
-              transition: var(--transition);
-          }
-          
-          .remove-item:hover {
-              color: var(--primary-color);
-          }
-      `
-  
-    document.head.appendChild(style)
-  
-    // Initialize cart UI
-    //updateCart(); // Removed because cart functionality is replaced
   })
   
