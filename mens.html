@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FashionHub | Men's Fashion Store</title>
+    <title>Men's Fashion | FashionHub</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,8 +21,8 @@
                 <span class="bar"></span>
             </div>
             <ul class="nav-menu">
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="mens.html">Men's Fashion</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="mens.html" class="active">Men's Fashion</a></li>
                 <li><a href="shirts.html">Shirts</a></li>
                 <li><a href="hoodies.html">Hoodies</a></li>
                 <li><a href="tshirts.html">T-Shirts</a></li>
@@ -35,68 +35,57 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Elevate Your Style</h1>
-            <p>Discover the latest trends in men's fashion</p>
-            <a href="mens.html" class="btn-primary">Shop Now</a>
-        </div>
-        <div class="hero-image">
-            <div class="hero-shape"></div>
-            <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="Men's Fashion">
+    <!-- Page Banner -->
+    <section class="page-banner">
+        <div class="banner-content">
+            <h1>Men's Fashion</h1>
+            <p>Discover our complete collection of men's clothing</p>
         </div>
     </section>
 
-    <!-- Categories Section -->
-    <section class="categories">
-        <div class="section-title">
-            <h2>Shop by Category</h2>
-            <p>Find your perfect style in our collections</p>
-        </div>
-        <div class="category-grid">
-            <div class="category-card">
-                <div class="category-img">
-                    <img src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80" alt="Shirts">
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label>Sort By:</label>
+                    <select>
+                        <option>Featured</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest</option>
+                        <option>Best Selling</option>
+                    </select>
                 </div>
-                <h3>Shirts</h3>
-                <a href="shirts.html" class="category-link">Shop Now</a>
-            </div>
-            <div class="category-card">
-                <div class="category-img">
-                    <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80" alt="Hoodies">
+                <div class="filter-group">
+                    <label>Category:</label>
+                    <select>
+                        <option>All Categories</option>
+                        <option>Shirts</option>
+                        <option>T-Shirts</option>
+                        <option>Hoodies</option>
+                        <option>Jackets</option>
+                        <option>Pants</option>
+                    </select>
                 </div>
-                <h3>Hoodies</h3>
-                <a href="hoodies.html" class="category-link">Shop Now</a>
-            </div>
-            <div class="category-card">
-                <div class="category-img">
-                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=464&q=80" alt="T-Shirts">
+                <div class="filter-group">
+                    <label>Price Range:</label>
+                    <select>
+                        <option>All Prices</option>
+                        <option>Under 100 dhs</option>
+                        <option>100 - 200 dhs</option>
+                        <option>200 - 300 dhs</option>
+                        <option>300+ dhs</option>
+                    </select>
                 </div>
-                <h3>T-Shirts</h3>
-                <a href="tshirts.html" class="category-link">Shop Now</a>
-            </div>
-            <div class="category-card">
-                <div class="category-img">
-                    <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80" alt="Accessories">
-                </div>
-                <h3>Accessories</h3>
-                <a href="#" class="category-link">Shop Now</a>
             </div>
         </div>
     </section>
 
-    <!-- Featured Products -->
-    <section class="featured-products">
-        <div class="section-title">
-            <h2>Featured Products</h2>
-            <p>Handpicked items that you'll love</p>
-        </div>
-        <div class="product-slider">
-            <button class="slider-arrow prev-arrow" id="prev-product">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="product-container" id="product-container">
+    <!-- Products Grid -->
+    <section class="products-grid">
+        <div class="container">
+            <div class="product-grid">
                 <div class="product-card">
                     <div class="product-badge">New</div>
                     <div class="product-img">
@@ -203,33 +192,78 @@
                     </div>
                     <button class="buy-now">BUY</button>
                 </div>
+                <div class="product-card">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1565115021788-6d3f1ade4980?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80" alt="Casual Shirt">
+                    </div>
+                    <div class="product-info">
+                        <h3>Casual Shirt</h3>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <span>(15)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">179 dhs</span>
+                            <span class="old-price">219 dhs</span>
+                        </div>
+                    </div>
+                    <button class="buy-now">BUY</button>
+                </div>
+                <div class="product-card">
+                    <div class="product-badge">New</div>
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80" alt="Striped T-Shirt">
+                    </div>
+                    <div class="product-info">
+                        <h3>Striped T-Shirt</h3>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span>(28)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">129 dhs</span>
+                        </div>
+                    </div>
+                    <button class="buy-now">BUY</button>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=436&q=80" alt="Bomber Jacket">
+                    </div>
+                    <div class="product-info">
+                        <h3>Bomber Jacket</h3>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <span>(19)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">349 dhs</span>
+                            <span class="old-price">399 dhs</span>
+                        </div>
+                    </div>
+                    <button class="buy-now">BUY</button>
+                </div>
             </div>
-            <button class="slider-arrow next-arrow" id="next-product">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    </section>
-
-    <!-- Special Offers -->
-    <section class="special-offers">
-        <div class="offer-card">
-            <div class="offer-content">
-                <h2>Summer Collection</h2>
-                <p>Up to 40% off on selected items</p>
-                <a href="mens.html" class="btn-secondary">Shop Now</a>
-            </div>
-            <div class="offer-image">
-                <img src="https://images.unsplash.com/photo-1550246140-29f40b909e5a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Summer Collection">
-            </div>
-        </div>
-        <div class="offer-card reverse">
-            <div class="offer-content">
-                <h2>New Arrivals</h2>
-                <p>Check out our latest collection</p>
-                <a href="mens.html" class="btn-secondary">Explore</a>
-            </div>
-            <div class="offer-image">
-                <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80" alt="New Arrivals">
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                <a href="#" class="active">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#" class="next">Next <i class="fas fa-chevron-right"></i></a>
             </div>
         </div>
     </section>
