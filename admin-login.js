@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // WhatsApp configuration - CHANGE THIS TO YOUR NUMBER
-    const WHATSAPP_PHONE = "1234567890" // Replace with your phone number in international format without + (e.g., 212612345678 for Morocco)
+    const WHATSAPP_PHONE = "0777770263" // Replace with your phone number in international format without + (e.g., 212612345678 for Morocco)
     // Check if user is logged in
     const isLoggedIn = localStorage.getItem("adminLoggedIn")
     const sessionExpiry = localStorage.getItem("adminSessionExpiry")
