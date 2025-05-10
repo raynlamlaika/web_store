@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // WhatsApp configuration - Morocco number
+    const WHATSAPP_PHONE = "212777770263" // Moroccan number in international format (removed leading 0, added 212)
     // Check if user is logged in
     const isLoggedIn = localStorage.getItem("adminLoggedIn")
     const sessionExpiry = localStorage.getItem("adminSessionExpiry")
@@ -378,8 +380,79 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     function loadAllOrders(orders) {
-      // Dummy implementation
-      console.log("loadAllOrders called with orders:", orders)
+      const ordersTable = document.getElementById("orders-table")
+      if (!ordersTable) return
+  
+      // Apply filters
+      let filteredOrders = [...orders]
+  
+      // Status filter
+      const statusFilter = document.getElementById("status-filter")
+      if (statusFilter && statusFilter.value !== "all") {
+        filteredOrders = filteredOrders.filter((order) => order.status === statusFilter.value)
+      }
+  
+      // Date filter
+      const dateFilter = document.getElementById("date-filter")
+      if (dateFilter && dateFilter.value) {
+        const filterDate = new Date(dateFilter.value)
+        filteredOrders = filteredOrders.filter((order) => {
+          const orderDate = new Date(order.date)
+          return (
+            orderDate.getDate() === filterDate.getDate() &&
+            orderDate.getMonth() === filterDate.getMonth() &&
+            orderDate.getFullYear() === filterDate.getFullYear()
+          )
+        })
+      }
+  
+      // Search
+      const orderSearch = document.getElementById("order-search")
+      if (orderSearch && orderSearch.value.trim() !== "") {
+        const searchTerm = orderSearch.value.trim().toLowerCase()
+        filteredOrders = filteredOrders.filter(
+          (order) =>
+            order.id.toLowerCase().includes(searchTerm) ||
+            order.customer.name.toLowerCase().includes(searchTerm) ||
+            order.customer.email.toLowerCase().includes(searchTerm) ||
+            order.customer.phone.toLowerCase().includes(searchTerm),
+        )
+      }
+  
+      // Sort by date (newest first)
+      filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date))
+  
+      if (filteredOrders.length === 0) {
+        ordersTable.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center">No orders found</td>
+        </tr>
+      `
+        return
+      }
+  
+      ordersTable.innerHTML = filteredOrders
+        .map(
+          (order) => `
+      <tr>
+        <td>${order.id}</td>
+        <td>${new Date(order.date).toLocaleString()}</td>
+        <td>${order.customer.name}</td>
+        <td>${order.customer.phone}</td>
+        <td>${order.total.toFixed(2)} dhs</td>
+        <td><span class="status status-${order.status}">${capitalizeFirstLetter(order.status)}</span></td>
+        <td>
+          <button class="action-btn view-btn" onclick="viewOrder('${order.id}')">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="action-btn whatsapp-btn" onclick="sendOrderToWhatsAppById('${order.id}')">
+            <i class="fab fa-whatsapp"></i>
+          </button>
+        </td>
+      </tr>
+    `,
+        )
+        .join("")
     }
   
     function showNotification(message, type = "success") {
@@ -452,5 +525,143 @@ document.addEventListener("DOMContentLoaded", () => {
   function capitalizeFirstLetter(string) {
     if (!string) return ""
     return string.charAt(0).toUpperCase() + string.slice(1)
+  }
+  
+  // Function to send order data to WhatsApp
+  function sendOrderToWhatsApp(order) {
+    // Format the order data into a readable message
+    let message = "🛍️ *ORDER DETAILS* 🛍️\n\n"
+    message += `*Order ID:* ${order.id}\n`
+    message += `*Date:* ${new Date(order.date).toLocaleString()}\n\n`
+  
+    message += "*Customer Information:*\n"
+    message += `Name: ${order.customer.name || "N/A"}\n`
+    message += `Email: ${order.customer.email || "N/A"}\n`
+    message += `Phone: ${order.customer.phone || "N/A"}\n`
+    message += `City: ${order.customer.city || "N/A"}\n`
+    message += `Address: ${order.customer.address || "N/A"}\n\n`
+  
+    message += "*Order Items:*\n"
+    order.products.forEach((product, index) => {
+      message += `${index + 1}. ${product.name} - ${product.price} dhs (${product.color}, ${product.size}) x${product.quantity}\n`
+    })
+  
+    message += "\n*Order Summary:*\n"
+    message += `Subtotal: ${order.subtotal.toFixed(2)} dhs\n`
+    message += `Delivery: ${order.delivery.fee} dhs (${order.delivery.method})\n`
+    message += `Total: ${order.total.toFixed(2)} dhs\n\n`
+  
+    message += `Payment Method: ${order.payment}\n`
+    message += `Status: ${order.status || "Processing"}`
+  
+    // Create WhatsApp URL with the message
+    const encodedMessage = encodeURIComponent(message)
+    const whatsappURL = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMessage}`
+  
+    // Open WhatsApp in a new tab
+    window.open(whatsappURL, "_blank")
+  
+    // Show notification
+    showNotification("Order details sent to WhatsApp")
+  }
+  
+  // Add this new function to send order to WhatsApp by ID
+  function sendOrderToWhatsAppById(orderId) {
+    const orders = JSON.parse(localStorage.getItem("orders")) || []
+    const order = orders.find((order) => order.id === orderId)
+  
+    if (order) {
+      sendOrderToWhatsApp(order)
+    } else {
+      showNotification("Order not found", "error")
+    }
+  }
+  
+  // View order details
+  function viewOrder(orderId) {
+    const orders = JSON.parse(localStorage.getItem("orders")) || []
+    const order = orders.find((order) => order.id === orderId)
+  
+    if (order) {
+      const orderDetailsModal = document.getElementById("order-details-modal")
+      const orderDetailsContent = document.getElementById("order-details-content")
+      const updateStatusBtn = document.querySelector(".update-status-btn")
+      const statusSelect = document.getElementById("status-select")
+  
+      if (orderDetailsModal && orderDetailsContent) {
+        // Set order ID for status update
+        if (updateStatusBtn) {
+          updateStatusBtn.setAttribute("data-order-id", order.id)
+        }
+  
+        // Set current status in select
+        if (statusSelect) {
+          statusSelect.value = order.status || "processing"
+        }
+  
+        // Format order details
+        let productsHTML = ""
+        order.products.forEach((product) => {
+          productsHTML += `
+            <div class="order-product">
+              <div class="order-product-img">
+                <img src="${product.image}" alt="${product.name}">
+              </div>
+              <div class="order-product-details">
+                <div class="order-product-name">${product.name}</div>
+                <div class="order-product-info">Color: ${product.color}</div>
+                <div class="order-product-info">Size: ${product.size}</div>
+                <div class="order-product-info">Quantity: ${product.quantity}</div>
+              </div>
+              <div class="order-product-price">${product.price * product.quantity} dhs</div>
+            </div>
+          `
+        })
+  
+        orderDetailsContent.innerHTML = `
+          <div class="order-details-header">
+            <div class="order-id">Order ID: ${order.id}</div>
+            <div class="order-date">Date: ${new Date(order.date).toLocaleString()}</div>
+            <div class="order-status">Status: <span class="status status-${order.status}">${capitalizeFirstLetter(
+              order.status,
+            )}</span></div>
+          </div>
+          <div class="order-details-section">
+            <h3>Customer Information</h3>
+            <div class="customer-info">
+              <div class="info-row"><span>Name:</span> ${order.customer.name}</div>
+              <div class="info-row"><span>Email:</span> ${order.customer.email}</div>
+              <div class="info-row"><span>Phone:</span> ${order.customer.phone}</div>
+              <div class="info-row"><span>City:</span> ${order.customer.city}</div>
+              <div class="info-row"><span>Address:</span> ${order.customer.address}</div>
+            </div>
+          </div>
+          <div class="order-details-section">
+            <h3>Products</h3>
+            <div class="order-products">
+              ${productsHTML}
+            </div>
+          </div>
+          <div class="order-details-section">
+            <h3>Order Summary</h3>
+            <div class="order-summary">
+              <div class="summary-row"><span>Subtotal:</span> ${order.subtotal.toFixed(2)} dhs</div>
+              <div class="summary-row"><span>Delivery Fee:</span> ${order.delivery.fee} dhs</div>
+              <div class="summary-row"><span>Delivery Method:</span> ${order.delivery.method}</div>
+              <div class="summary-row"><span>Payment Method:</span> ${order.payment}</div>
+              <div class="summary-row total"><span>Total:</span> ${order.total.toFixed(2)} dhs</div>
+            </div>
+          </div>
+          <div class="order-actions">
+            <button class="btn-primary whatsapp-btn" onclick="sendOrderToWhatsAppById('${order.id}')">
+              <i class="fab fa-whatsapp"></i> Send to WhatsApp
+            </button>
+          </div>
+        `
+  
+        // Show modal
+        orderDetailsModal.classList.add("active")
+      }
+    }
   }
   

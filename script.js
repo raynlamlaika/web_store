@@ -1,7 +1,7 @@
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-    // WhatsApp configuration - CHANGE THIS TO YOUR NUMBER
-    const WHATSAPP_PHONE = "1234567890" // Replace with your phone number in international format without + (e.g., 212612345678 for Morocco)
+    // WhatsApp configuration - Morocco number
+    const WHATSAPP_PHONE = "212777770263" // Moroccan number in international format (removed leading 0, added 212)
   
     // Mobile Menu Toggle
     const mobileMenu = document.getElementById("mobile-menu")
@@ -492,6 +492,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
       // Open WhatsApp in a new tab
       window.open(whatsappURL, "_blank")
+  
+      // Show notification that order was sent to WhatsApp
+      showNotification("Order details sent to store owner via WhatsApp")
     }
   })
   
