@@ -270,6 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
               payment: paymentMethod,
               subtotal: checkoutProducts.reduce((total, item) => total + item.price * item.quantity, 0),
               total: totalPrice,
+              status: "processing", // Add status field for admin dashboard
             }
   
             // Save order to localStorage
