@@ -1,5 +1,8 @@
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
+    // WhatsApp configuration - CHANGE THIS TO YOUR NUMBER
+    const WHATSAPP_PHONE = "1234567890" // Replace with your phone number in international format without + (e.g., 212612345678 for Morocco)
+  
     // Mobile Menu Toggle
     const mobileMenu = document.getElementById("mobile-menu")
     if (mobileMenu) {
@@ -381,6 +384,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           confirmationModal.style.opacity = "1"
         }, 10)
+  
+        // Send order notification to WhatsApp
+        sendOrderToWhatsApp(order)
       }
     }
   
@@ -451,6 +457,41 @@ document.addEventListener("DOMContentLoaded", () => {
           showNotification("Please enter a valid email address.", "error")
         }
       })
+    }
+  
+    // Function to send order data to WhatsApp
+    function sendOrderToWhatsApp(order) {
+      // Format the order data into a readable message
+      let message = "🛍️ *NEW ORDER RECEIVED* 🛍️\n\n"
+      message += `*Order ID:* ${order.id}\n`
+      message += `*Date:* ${new Date(order.date).toLocaleString()}\n\n`
+  
+      message += "*Customer Information:*\n"
+      message += `Name: ${order.customer.name || "N/A"}\n`
+      message += `Email: ${order.customer.email || "N/A"}\n`
+      message += `Phone: ${order.customer.phone || "N/A"}\n`
+      message += `City: ${order.customer.city || "N/A"}\n`
+      message += `Address: ${order.customer.address || "N/A"}\n\n`
+  
+      message += "*Order Items:*\n"
+      order.products.forEach((product, index) => {
+        message += `${index + 1}. ${product.name} - ${product.price} dhs (${product.color}, ${product.size}) x${product.quantity}\n`
+      })
+  
+      message += "\n*Order Summary:*\n"
+      message += `Subtotal: ${order.subtotal.toFixed(2)} dhs\n`
+      message += `Delivery: ${order.delivery.fee} dhs (${order.delivery.method})\n`
+      message += `Total: ${order.total.toFixed(2)} dhs\n\n`
+  
+      message += `Payment Method: ${order.payment}\n`
+      message += `Status: ${order.status || "Processing"}`
+  
+      // Create WhatsApp URL with the message
+      const encodedMessage = encodeURIComponent(message)
+      const whatsappURL = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMessage}`
+  
+      // Open WhatsApp in a new tab
+      window.open(whatsappURL, "_blank")
     }
   })
   

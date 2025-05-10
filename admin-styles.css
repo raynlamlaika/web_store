@@ -829,3 +829,19 @@
     }
   }
   
+  /* WhatsApp Button */
+  .whatsapp-btn {
+    background-color: #25d366 !important;
+    color: white !important;
+    border-color: #25d366 !important;
+  }
+  
+  .whatsapp-btn:hover {
+    background-color: #128c7e !important;
+    border-color: #128c7e !important;
+  }
+  
+  .whatsapp-btn i {
+    margin-right: 5px;
+  }
+  
